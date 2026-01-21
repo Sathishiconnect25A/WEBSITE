@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Application Test</title>
+    <meta charset="UTF-8">
+</head>
+
+<body style="max-width: 600px; margin: 30px auto; font-family: Arial;">
+
+    <h2>Student Application - Test Form</h2>
+
+    <form id="studentForm">
+
+        <label>Contact Person Name:</label><br>
+        <input type="text" name="contactPersonName" required><br><br>
+
+        <label>Email Address:</label><br>
+        <input type="email" name="emailAddress" required><br><br>
+
+        <label>Mobile Number:</label><br>
+        <input type="text" name="mobileNumber" required><br><br>
+
+        <label>School Name:</label><br>
+        <input type="text" name="schoolName" required><br><br>
+
+        <label>School Address:</label><br>
+        <textarea name="schoolAddress"></textarea><br><br>
+
+        <label>Approx No. of Students:</label><br>
+        <input type="number" name="approxNoOfStudents"><br><br>
+
+        <label>Current Software Used:</label><br>
+        <input type="text" name="currentSoftwareUsed"><br><br>
+
+        <label>Training Needs:</label><br>
+        <textarea name="trainingNeeds"></textarea><br><br>
+
+        <button type="submit">Submit Application</button>
+
+    </form>
+
+    <p id="responseText" style="color: green; margin-top: 20px;"></p>
+
+    <hr><br>
+
+    <h3>Get Student Application By ID</h3>
+    <input id="studentIdInput" type="number" placeholder="Enter Student ID">
+    <button onclick="getStudentById()">Get Details</button>
+
+    <pre id="studentDetails" style="background: #f2f2f2; padding: 10px;"></pre>
+
+    <hr><br>
+
+    <h3>All Applications</h3>
+    <button onclick="getAllStudents()">Load All</button>
+
+    <pre id="allStudents" style="background: #f2f2f2; padding: 10px;"></pre>
+
+    <script>
+        // Submit Student Application
+        document.getElementById("studentForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const jsonObject = {};
+
+            formData.forEach((value, key) => jsonObject[key] = value);
+
+            const response = await fetch("http://localhost:8080/api/student/submit", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(jsonObject)
+            });
+
+            const result = await response.json();
+            document.getElementById("responseText").innerText =
+                "Submitted Successfully! ID: " + result.id;
+        });
+
+        // Get Application By ID
+        async function getStudentById() {
+            const id = document.getElementById("studentIdInput").value;
+
+            const res = await fetch(`http://localhost:8080/api/student/getById?id=${id}`);
+            const data = await res.json();
+
+            document.getElementById("studentDetails").innerText = JSON.stringify(data, null, 4);
+        }
+
+        // Get All Students
+        async function getAllStudents() {
+            const res = await fetch("http://localhost:8080/api/student/all");
+            const data = await res.json();
+
+            document.getElementById("allStudents").innerText = JSON.stringify(data, null, 4);
+        }
+    </script>
+
+</body>
+</html>

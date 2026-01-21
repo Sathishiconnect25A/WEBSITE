@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Job Application</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f2f4f7;
+            margin: 0;
+            padding: 40px 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .box {
+            background: white;
+            width: 420px;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        input, select {
+            width: 95%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 15px;
+        }
+
+        input:focus, select:focus {
+            border-color: #0074ff;
+            outline: none;
+            box-shadow: 0 0 4px rgba(0,116,255,0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            margin-top: 12px;
+            background: #0074ff;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #005cd4;
+        }
+
+        #res {
+            margin-top: 15px;
+            font-weight: bold;
+            color: green;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>Apply for Job</h2>
+
+    <input id="fullName" placeholder="Full Name" required>
+    <input id="email" type="email" placeholder="Email" required>
+    <input id="phoneNumber" placeholder="Phone Number" required>
+    <input id="role" placeholder="Job Role" required>
+
+    <select id="experienceType" onchange="toggleExperience()">
+        <option value="">Select Experience Type</option>
+        <option value="Fresher">Fresher</option>
+        <option value="Experienced">Experienced</option>
+    </select>
+
+    <input id="experienceYears" type="number" placeholder="Years of Experience" class="hidden">
+
+    <input type="file" id="resume" required>
+
+    <button onclick="apply()">Submit Application</button>
+
+    <p id="res"></p>
+</div>
+
+<script>
+const BASE = "http://localhost:8080/api/jobs";
+
+// Show or hide experience years input
+function toggleExperience() {
+    if (experienceType.value === "Experienced") {
+        experienceYears.classList.remove("hidden");
+    } else {
+        experienceYears.classList.add("hidden");
+        experienceYears.value = "";
+    }
+}
+
+// Submit application
+async function apply() {
+
+    // Basic validations
+    if (!fullName.value || !email.value || !phoneNumber.value || !role.value) {
+        alert("Please fill all required fields.");
+        return;
+    }
+
+    if (experienceType.value === "") {
+        alert("Please select experience type.");
+        return;
+    }
+
+    if (experienceType.value === "Experienced" &&
+        (!experienceYears.value || experienceYears.value <= 0)) {
+        alert("Please enter valid years of experience.");
+        return;
+    }
+
+    if (!resume.files[0]) {
+        alert("Please upload your resume.");
+        return;
+    }
+
+    let formData = new FormData();
+    formData.append("fullName", fullName.value);
+    formData.append("email", email.value);
+    formData.append("phoneNumber", phoneNumber.value);
+    formData.append("role", role.value);
+    formData.append("experienceType", experienceType.value);
+    formData.append("experienceYears", experienceYears.value);
+    formData.append("resume", resume.files[0]);
+
+    let res = await fetch(BASE + "/apply", { method: "POST", body: formData });
+
+    if (res.ok) {
+        document.getElementById("res").innerText = "Application Submitted Successfully!";
+        clearForm();
+    } else {
+        document.getElementById("res").innerText = "Something went wrong. Try again!";
+    }
+}
+
+function clearForm() {
+    fullName.value = "";
+    email.value = "";
+    phoneNumber.value = "";
+    role.value = "";
+    experienceType.value = "";
+    experienceYears.value = "";
+    experienceYears.classList.add("hidden");
+    resume.value = "";
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Candidate Application</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f2f6ff;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 0 12px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #003f8c;
+        }
+
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+            color: #333;
+        }
+
+        input, select, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 6px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        button:hover {
+            background-color: #005fcc;
+        }
+
+        #response {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 17px;
+            color: green;
+            font-weight: bold;
+        }
+
+        .download-section {
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .footer-line {
+            border-top: 2px solid #ddd;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h2>Candidate Application Form</h2>
+
+        <form id="candidateForm" enctype="multipart/form-data">
+
+            <label>Name</label>
+            <input type="text" name="candidateName" required>
+
+            <label>Mobile Number</label>
+            <input type="text" name="mobileNumber" required>
+
+            <label>Email</label>
+            <input type="email" name="email" required>
+
+            <label>Qualification</label>
+            <select name="qualification" id="qualificationDropdown" required></select>
+
+            <label>Year of Passing</label>
+            <select name="yearOfPassing" id="yearDropdown" required></select>
+
+            <label>Course Interested</label>
+            <select name="courseInterested" id="courseDropdown" required></select>
+
+            <label>Key Skills</label>
+            <textarea name="keySkills"></textarea>
+
+            <label>Additional Details</label>
+            <textarea name="additionalDetails"></textarea>
+
+            <label>Upload Resume</label>
+            <input type="file" name="resume" required>
+
+            <button type="submit">Submit Application</button>
+
+        </form>
+
+        <p id="response"></p>
+
+        <div class="footer-line"></div>
+
+        <div class="download-section">
+            <h3>Download Resume</h3>
+            <input type="number" id="downloadId" placeholder="Enter Candidate ID">
+            <button onclick="downloadResume()">Download</button>
+        </div>
+    </div>
+
+    <script>
+        // Fetch dropdown data from Backend
+        async function loadDropdowns() {
+            const response = await fetch("http://localhost:8080/api/candidate/dropdowns");
+            const data = await response.json();
+
+            fillDropdown("qualificationDropdown", data.qualification);
+            fillDropdown("yearDropdown", data.yearOfPassing);
+            fillDropdown("courseDropdown", data.courseInterested);
+        }
+
+        function fillDropdown(id, list) {
+            const dropdown = document.getElementById(id);
+            list.forEach(value => {
+                const option = document.createElement("option");
+                option.value = value;
+                option.textContent = value;
+                dropdown.appendChild(option);
+            });
+        }
+
+        // Submit Form
+        document.getElementById("candidateForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+
+            const response = await fetch("http://localhost:8080/api/candidate/submit", {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await response.text();
+            document.getElementById("response").innerText = result;
+        });
+
+        // Download Resume
+        function downloadResume() {
+            const id = document.getElementById("downloadId").value;
+            window.location.href = `http://localhost:8080/api/candidate/resume/candidateId?id=${id}`;
+        }
+
+        loadDropdowns();
+    </script>
+
+</body>
+</html>
